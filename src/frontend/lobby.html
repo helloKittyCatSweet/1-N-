@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多人跑团游戏 - 游戏大厅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#ec4899',
+                        dark: '#1e293b',
+                        light: '#f8fafc',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444'
+                    },
+                    fontFamily: {
+                        fantasy: ['MedievalSharp', 'cursive'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            .bg-texture {
+                background-image: url('https://picsum.photos/id/1073/1920/1080');
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .room-card-hover {
+                transition: all 0.3s ease;
+            }
+            .room-card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2);
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-light min-h-screen bg-texture bg-dark/95">
+    <!-- 顶部导航 -->
+    <header class="bg-dark/80 backdrop-blur-md border-b border-primary/30 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-dragon text-primary text-2xl"></i>
+                <h1 class="text-xl font-fantasy font-bold text-primary">龙与地下城跑团</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="notificationsBtn" class="relative p-2 rounded-full hover:bg-primary/20 transition-colors">
+                    <i class="fa fa-bell text-light/70"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
+                </button>
+                <div class="flex items-center space-x-2 cursor-pointer group">
+                    <div class="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden border border-primary/50">
+                        <i class="fa fa-user text-primary"></i>
+                    </div>
+                    <span class="text-sm font-medium hidden md:inline-block">冒险者</span>
+                    <i class="fa fa-angle-down text-light/50 group-hover:text-primary transition-colors"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 页面标题 -->
+        <div class="text-center mb-8">
+            <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-fantasy text-primary">冒险大厅</h2>
+            <p class="text-light/60 mt-1">加入或创建一个冒险队伍，开始你的传奇故事</p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <div class="relative w-full sm:w-auto">
+                <input type="text" placeholder="搜索游戏房间..." class="w-full sm:w-64 pl-10 pr-4 py-2 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40">
+                <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/50"></i>
+            </div>
+            <button id="createRoomBtn" class="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center space-x-2 w-full sm:w-auto justify-center">
+                <i class="fa fa-plus-circle"></i>
+                <span>创建新房间</span>
+            </button>
+        </div>
+
+        <!-- 房间列表 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 房间卡片 1 -->
+            <div class="bg-dark/60 backdrop-blur-sm rounded-xl overflow-hidden border border-primary/20 room-card-hover">
+                <div class="p-4 border-b border-primary/10 bg-primary/5">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-fantasy text-primary font-bold">被遗忘的神庙</h3>
+                        <span class="text-xs px-2 py-1 bg-success/20 text-success rounded-full">进行中</span>
+                    </div>
+                    <p class="text-light/50 text-sm mt-1">DM: 神秘守护者</p>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-light/60"><i class="fa fa-users mr-1 text-primary/50"></i> 3/5 玩家</span>
+                        <span class="text-sm text-light/60"><i class="fa fa-clock-o mr-1 text-primary/50"></i> 2小时45分</span>
+                    </div>
+                    <p class="text-sm text-light/70 line-clamp-2 mb-4">探索古老神庙的秘密，面对未知的陷阱和守护者，寻找传说中的神器。</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-primary/30 border-2 border-dark flex items-center justify-center text-xs">A</div>
+                            <div class="w-6 h-6 rounded-full bg-secondary/30 border-2 border-dark flex items-center justify-center text-xs">B</div>
+                            <div class="w-6 h-6 rounded-full bg-warning/30 border-2 border-dark flex items-center justify-center text-xs">C</div>
+                        </div>
+                        <button class="text-xs bg-primary/20 hover:bg-primary/30 text-primary px-3 py-1 rounded-lg transition-colors">加入房间</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 房间卡片 2 -->
+            <div class="bg-dark/60 backdrop-blur-sm rounded-xl overflow-hidden border border-primary/20 room-card-hover">
+                <div class="p-4 border-b border-primary/10 bg-primary/5">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-fantasy text-primary font-bold">巨龙的宝藏</h3>
+                        <span class="text-xs px-2 py-1 bg-warning/20 text-warning rounded-full">等待中</span>
+                    </div>
+                    <p class="text-light/50 text-sm mt-1">DM: 金色法师</p>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-light/60"><i class="fa fa-users mr-1 text-primary/50"></i> 1/4 玩家</span>
+                        <span class="text-sm text-light/60"><i class="fa fa-clock-o mr-1 text-primary/50"></i> 等待开始</span>
+                    </div>
+                    <p class="text-sm text-light/70 line-clamp-2 mb-4">深入巨龙山脉，寻找被守护的古代宝藏，你需要智慧和勇气才能成功。</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-primary/30 border-2 border-dark flex items-center justify-center text-xs">D</div>
+                            <div class="w-6 h-6 rounded-full bg-dark border-2 border-primary/30 flex items-center justify-center text-xs text-primary/50">+3</div>
+                        </div>
+                        <button class="text-xs bg-primary/20 hover:bg-primary/30 text-primary px-3 py-1 rounded-lg transition-colors">加入房间</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 房间卡片 3 -->
+            <div class="bg-dark/60 backdrop-blur-sm rounded-xl overflow-hidden border border-primary/20 room-card-hover">
+                <div class="p-4 border-b border-primary/10 bg-primary/5">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-fantasy text-primary font-bold">亡灵的诅咒</h3>
+                        <span class="text-xs px-2 py-1 bg-danger/20 text-danger rounded-full">已满</span>
+                    </div>
+                    <p class="text-light/50 text-sm mt-1">DM: 暗影牧师</p>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-light/60"><i class="fa fa-users mr-1 text-primary/50"></i> 5/5 玩家</span>
+                        <span class="text-sm text-light/60"><i class="fa fa-clock-o mr-1 text-primary/50"></i> 1小时10分</span>
+                    </div>
+                    <p class="text-sm text-light/70 line-clamp-2 mb-4">解除古老城堡的亡灵诅咒，与巫妖展开最终对决，拯救被诅咒的土地。</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-primary/30 border-2 border-dark flex items-center justify-center text-xs">E</div>
+                            <div class="w-6 h-6 rounded-full bg-secondary/30 border-2 border-dark flex items-center justify-center text-xs">F</div>
+                            <div class="w-6 h-6 rounded-full bg-warning/30 border-2 border-dark flex items-center justify-center text-xs">G</div>
+                            <div class="w-6 h-6 rounded-full bg-success/30 border-2 border-dark flex items-center justify-center text-xs">H</div>
+                            <div class="w-6 h-6 rounded-full bg-danger/30 border-2 border-dark flex items-center justify-center text-xs">I</div>
+                        </div>
+                        <button class="text-xs bg-light/10 text-light/50 px-3 py-1 rounded-lg cursor-not-allowed">房间已满</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 房间卡片 4 -->
+            <div class="bg-dark/60 backdrop-blur-sm rounded-xl overflow-hidden border border-primary/20 room-card-hover">
+                <div class="p-4 border-b border-primary/10 bg-primary/5">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-fantasy text-primary font-bold">精灵的森林</h3>
+                        <span class="text-xs px-2 py-1 bg-warning/20 text-warning rounded-full">等待中</span>
+                    </div>
+                    <p class="text-light/50 text-sm mt-1">DM: 绿叶守护者</p>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-light/60"><i class="fa fa-users mr-1 text-primary/50"></i> 2/5 玩家</span>
+                        <span class="text-sm text-light/60"><i class="fa fa-clock-o mr-1 text-primary/50"></i> 等待开始</span>
+                    </div>
+                    <p class="text-sm text-light/70 line-clamp-2 mb-4">进入神秘的精灵森林，学习古老的魔法，帮助精灵族对抗黑暗势力。</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-primary/30 border-2 border-dark flex items-center justify-center text-xs">J</div>
+                            <div class="w-6 h-6 rounded-full bg-secondary/30 border-2 border-dark flex items-center justify-center text-xs">K</div>
+                            <div class="w-6 h-6 rounded-full bg-dark border-2 border-primary/30 flex items-center justify-center text-xs text-primary/50">+3</div>
+                        </div>
+                        <button class="text-xs bg-primary/20 hover:bg-primary/30 text-primary px-3 py-1 rounded-lg transition-colors">加入房间</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 房间卡片 5 -->
+            <div class="bg-dark/60 backdrop-blur-sm rounded-xl overflow-hidden border border-primary/20 room-card-hover">
+                <div class="p-4 border-b border-primary/10 bg-primary/5">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-fantasy text-primary font-bold">盗贼的公会</h3>
+                        <span class="text-xs px-2 py-1 bg-success/20 text-success rounded-full">进行中</span>
+                    </div>
+                    <p class="text-light/50 text-sm mt-1">DM: 无声刺客</p>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-light/60"><i class="fa fa-users mr-1 text-primary/50"></i> 4/4 玩家</span>
+                        <span class="text-sm text-light/60"><i class="fa fa-clock-o mr-1 text-primary/50"></i> 3小时20分</span>
+                    </div>
+                    <p class="text-sm text-light/70 line-clamp-2 mb-4">潜入城市中的盗贼公会，完成各种盗窃任务，提升你的盗贼等级。</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-primary/30 border-2 border-dark flex items-center justify-center text-xs">L</div>
+                            <div class="w-6 h-6 rounded-full bg-secondary/30 border-2 border-dark flex items-center justify-center text-xs">M</div>
+                            <div class="w-6 h-6 rounded-full bg-warning/30 border-2 border-dark flex items-center justify-center text-xs">N</div>
+                            <div class="w-6 h-6 rounded-full bg-success/30 border-2 border-dark flex items-center justify-center text-xs">O</div>
+                        </div>
+                        <button class="text-xs bg-light/10 text-light/50 px-3 py-1 rounded-lg cursor-not-allowed">房间已满</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 创建房间卡片 -->
+            <div class="border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center p-8 h-full cursor-pointer hover:border-primary/60 hover:bg-primary/5 transition-colors" id="quickCreateRoom">
+                <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                    <i class="fa fa-plus text-primary text-2xl"></i>
+                </div>
+                <h3 class="font-fantasy text-primary text-lg mb-1">快速创建房间</h3>
+                <p class="text-light/50 text-sm text-center">点击创建一个新的冒险房间，成为地下城主</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 创建房间模态框 -->
+    <div id="createRoomModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-dark/90 backdrop-blur-md rounded-xl border border-primary/30 w-full max-w-md mx-4 transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+            <div class="p-6 border-b border-primary/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-fantasy text-primary">创建新房间</h3>
+                    <button id="closeModalBtn" class="text-light/50 hover:text-light transition-colors">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <form id="createRoomForm" class="space-y-4">
+                    <div>
+                        <label for="roomName" class="block text-sm font-medium text-light/80 mb-1">房间名称</label>
+                        <input type="text" id="roomName" class="w-full px-4 py-2 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40" placeholder="输入房间名称">
+                    </div>
+                    <div>
+                        <label for="roomDescription" class="block text-sm font-medium text-light/80 mb-1">房间描述</label>
+                        <textarea id="roomDescription" rows="3" class="w-full px-4 py-2 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40" placeholder="描述你的冒险内容"></textarea>
+                    </div>
+                    <div>
+                        <label for="maxPlayers" class="block text-sm font-medium text-light/80 mb-1">最大玩家数</label>
+                        <select id="maxPlayers" class="w-full px-4 py-2 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light">
+                            <option value="2">2人</option>
+                            <option value="3">3人</option>
+                            <option value="4" selected>4人</option>
+                            <option value="5">5人</option>
+                            <option value="6">6人</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="isPrivate" type="checkbox" class="h-4 w-4 rounded border-primary/30 bg-dark/50 text-primary focus:ring-primary/50">
+                        <label for="isPrivate" class="ml-2 block text-sm text-light/70">设为私密房间（需要密码才能加入）</label>
+                    </div>
+                    <div id="passwordField" class="hidden">
+                        <label for="roomPassword" class="block text-sm font-medium text-light/80 mb-1">房间密码</label>
+                        <input type="password" id="roomPassword" class="w-full px-4 py-2 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40" placeholder="设置房间密码">
+                    </div>
+                </form>
+            </div>
+            <div class="p-4 border-t border-primary/20 flex justify-end space-x-3">
+                <button id="cancelCreateBtn" class="px-4 py-2 border border-primary/30 text-primary hover:bg-primary/10 rounded-lg transition-colors">取消</button>
+                <button id="confirmCreateBtn" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">创建房间</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模态框功能
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const quickCreateRoom = document.getElementById('quickCreateRoom');
+        const createRoomModal = document.getElementById('createRoomModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelCreateBtn = document.getElementById('cancelCreateBtn');
+        const isPrivateCheckbox = document.getElementById('isPrivate');
+        const passwordField = document.getElementById('passwordField');
+        const confirmCreateBtn = document.getElementById('confirmCreateBtn');
+
+        // 打开模态框
+        function openModal() {
+            createRoomModal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                createRoomModal.classList.add('hidden');
+            }, 300);
+        }
+
+        // 事件监听
+        createRoomBtn.addEventListener('click', openModal);
+        quickCreateRoom.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelCreateBtn.addEventListener('click', closeModal);
+        createRoomModal.addEventListener('click', (e) => {
+            if (e.target === createRoomModal) closeModal();
+        });
+
+        // 私密房间密码显示/隐藏
+        isPrivateCheckbox.addEventListener('change', () => {
+            if (isPrivateCheckbox.checked) {
+                passwordField.classList.remove('hidden');
+            } else {
+                passwordField.classList.add('hidden');
+            }
+        });
+
+        // 创建房间
+        confirmCreateBtn.addEventListener('click', () => {
+            const roomName = document.getElementById('roomName').value;
+            if (!roomName) {
+                alert('请输入房间名称');
+                return;
+            }
+            // 模拟创建房间
+            alert('房间创建成功！');
+            closeModal();
+            // 跳转到游戏房间页面
+            window.location.href = 'game.html';
+        });
+
+        // 加入房间按钮
+        document.querySelectorAll('.room-card-hover .btn-primary').forEach(button => {
+            button.addEventListener('click', () => {
+                window.location.href = 'game.html';
+            });
+        });
+    </script>
+</body>
+</html>

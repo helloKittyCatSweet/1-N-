@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多人跑团游戏 - 登录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#ec4899',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        fantasy: ['MedievalSharp', 'cursive'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            .bg-texture {
+                background-image: url('https://picsum.photos/id/307/1000/1000');
+                background-size: cover;
+                background-position: center;
+                background-blend-mode: overlay;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-light min-h-screen flex items-center justify-center p-4 bg-texture bg-dark/90">
+    <div class="w-full max-w-md">
+        <div class="bg-dark/80 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden border border-primary/30 transform transition-all duration-500 hover:shadow-primary/20">
+            <div class="bg-primary/20 p-6 text-center border-b border-primary/30">
+                <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-fantasy font-bold text-primary text-shadow">
+                    龙与地下城<br>跑团游戏
+                </h1>
+                <p class="text-light/70 mt-2">欢迎加入冒险世界</p>
+            </div>
+            <div class="p-6">
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-light/80 mb-1">用户名</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary/70">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input type="text" id="username" class="w-full pl-10 pr-4 py-3 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40" placeholder="输入你的冒险代号">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-light/80 mb-1">密码</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary/70">
+                                <i class="fa fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" class="w-full pl-10 pr-4 py-3 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40" placeholder="保护你的秘密">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input id="remember" type="checkbox" class="h-4 w-4 rounded border-primary/30 bg-dark/50 text-primary focus:ring-primary/50">
+                            <label for="remember" class="ml-2 block text-sm text-light/70">记住我</label>
+                        </div>
+                        <a href="#" class="text-sm text-primary hover:text-primary/80 transition-colors">忘记密码?</a>
+                    </div>
+                    <button type="submit" class="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20">
+                        开始冒险
+                    </button>
+                </form>
+                <div class="mt-6 text-center">
+                    <p class="text-light/70 text-sm">
+                        还没有账号? <a href="register.html" class="text-primary hover:text-primary/80 font-medium transition-colors">创建账号</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 text-center text-light/50 text-sm">
+            <p>© 2023 龙与地下城跑团游戏 | 踏上你的英雄之旅</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // 简单的表单验证
+            const username = document.getElementById('username').value;
+            if (!username) {
+                alert('请输入用户名');
+                return;
+            }
+            // 登录成功后跳转到游戏大厅
+            window.location.href = 'lobby.html';
+        });
+    </script>
+</body>
+</html>

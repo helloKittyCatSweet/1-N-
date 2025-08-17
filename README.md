@@ -3,6 +3,10 @@ This is a project for Hackathon contest held by NTU×Base. Detailed descriptions
 
 # Required Environments
 Node.js v22.12.0
+MySQL 8.x
+
+# Quick Start
+backend: Go to where "server.js" file is located at and use "node server.js" to run your backend.
 
 # Resources of Sogni AI
 Sogni SDK Docs: https://sdk-docs.sogni.ai/  

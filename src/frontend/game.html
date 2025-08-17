@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>被遗忘的神庙 - 跑团游戏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#ec4899',
+                        dark: '#1e293b',
+                        darker: '#0f172a',
+                        light: '#f8fafc',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    },
+                    fontFamily: {
+                        fantasy: ['MedievalSharp', 'cursive'],
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    backgroundImage: {
+                        'parchment': "url('https://picsum.photos/id/301/1000/1000')",
+                        'stone': "url('https://picsum.photos/id/1065/1000/1000')"
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            .bg-blur {
+                backdrop-filter: blur(8px);
+            }
+            .scrollbar-thin {
+                scrollbar-width: thin;
+            }
+            .scrollbar-thumb-rounded {
+                scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+            }
+            .dice-roll {
+                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            .dice-roll:hover {
+                transform: rotate(15deg) scale(1.1);
+            }
+            .dice-rolling {
+                animation: roll 1s ease-out forwards;
+            }
+            @keyframes roll {
+                0% { transform: rotate(0deg) scale(1); }
+                50% { transform: rotate(720deg) scale(1.2); }
+                100% { transform: rotate(1080deg) scale(1); }
+            }
+            .pulse-border {
+                animation: pulse-border 2s infinite;
+            }
+            @keyframes pulse-border {
+                0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-light min-h-screen overflow-hidden">
+    <!-- 顶部导航 -->
+    <header class="bg-darker/90 bg-blur border-b border-primary/30 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-dragon text-primary text-2xl"></i>
+                <h1 class="text-xl font-fantasy font-bold text-primary">被遗忘的神庙</h1>
+                <span class="text-xs px-2 py-1 bg-warning/20 text-warning rounded-full ml-2">进行中</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-1 bg-dark/50 rounded-full px-3 py-1 border border-primary/20">
+                    <i class="fa fa-clock-o text-primary/70 text-sm"></i>
+                    <span class="text-xs text-light/70">游戏时间: 2小时45分</span>
+                </div>
+                <button id="settingsBtn" class="p-2 rounded-full hover:bg-primary/20 transition-colors">
+                    <i class="fa fa-cog text-light/70"></i>
+                </button>
+                <button id="leaveGameBtn" class="hidden md:flex items-center space-x-1 text-danger hover:text-danger/80 transition-colors">
+                    <i class="fa fa-sign-out"></i>
+                    <span class="text-sm">离开游戏</span>
+                </button>
+                <button id="leaveGameMobileBtn" class="md:hidden p-2 rounded-full hover:bg-danger/20 transition-colors text-danger">
+                    <i class="fa fa-sign-out"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-col md:flex-row h-[calc(100vh-61px)] overflow-hidden">
+        <!-- 左侧玩家面板 -->
+        <aside class="w-full md:w-64 bg-darker/80 border-r border-primary/20 flex-shrink-0 overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-primary/20 bg-primary/10">
+                <h2 class="text-sm font-medium text-primary/80 uppercase tracking-wider">冒险队伍</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded p-3 space-y-3">
+                <!-- DM -->
+                <div class="bg-primary/10 rounded-lg p-3 border border-primary/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-fantasy text-primary font-bold text-sm">神秘守护者</h3>
+                        <span class="text-xs px-1.5 py-0.5 bg-secondary/20 text-secondary rounded">DM</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-light/60">
+                        <span>地下城主</span>
+                        <span class="text-success"><i class="fa fa-circle text-xs mr-1"></i>在线</span>
+                    </div>
+                </div>
+
+                <!-- 玩家 1 -->
+                <div class="bg-dark/50 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-fantasy text-primary font-bold text-sm">勇者亚瑟</h3>
+                        <span class="text-xs px-1.5 py-0.5 bg-warning/20 text-warning rounded">战士</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-light/60">
+                        <span>生命值: 85/100</span>
+                        <span class="text-success"><i class="fa fa-circle text-xs mr-1"></i>在线</span>
+                    </div>
+                    <div class="w-full bg-dark mt-2 rounded-full h-1.5">
+                        <div class="bg-warning h-1.5 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+
+                <!-- 玩家 2 -->
+                <div class="bg-dark/50 rounded-lg p-3 border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-fantasy text-primary font-bold text-sm">法师莉娜</h3>
+                        <span class="text-xs px-1.5 py-0.5 bg-info/20 text-info rounded">法师</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-light/60">
+                        <span>生命值: 60/75</span>
+                        <span class="text-success"><i class="fa fa-circle text-xs mr-1"></i>在线</span>
+                    </div>
+                    <div class="w-full bg-dark mt-2 rounded-full h-1.5">
+                        <div class="bg-info h-1.5 rounded-full" style="width: 80%"></div>
+                    </div>
+                </div>
+
+                <!-- 当前玩家 -->
+                <div class="bg-dark/50 rounded-lg p-3 border-2 border-primary/50 pulse-border cursor-pointer">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-fantasy text-primary font-bold text-sm">冒险者 <span class="text-xs text-primary/70">(你)</span></h3>
+                        <span class="text-xs px-1.5 py-0.5 bg-success/20 text-success rounded">盗贼</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-light/60">
+                        <span>生命值: 70/70</span>
+                        <span class="text-success"><i class="fa fa-circle text-xs mr-1"></i>在线</span>
+                    </div>
+                    <div class="w-full bg-dark mt-2 rounded-full h-1.5">
+                        <div class="bg-success h-1.5 rounded-full" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- 空位 -->
+                <div class="bg-dark/30 rounded-lg p-3 border border-dashed border-primary/20 hover:border-primary/40 transition-colors cursor-pointer flex items-center justify-center h-20">
+                    <div class="text-center">
+                        <i class="fa fa-plus-circle text-primary/50 text-xl mb-1"></i>
+                        <p class="text-xs text-light/50">等待加入...</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主游戏区域 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- 游戏内容标签页 -->
+            <div class="bg-darker/80 border-b border-primary/30 flex">
+                <button class="game-tab-btn active flex-1 py-3 text-sm font-medium text-primary border-b-2 border-primary" data-tab="narrative">
+                    <i class="fa fa-book mr-2"></i>故事叙述
+                </button>
+                <button class="game-tab-btn flex-1 py-3 text-sm font-medium text-light/50 hover:text-light/80 transition-colors" data-tab="characters">
+                    <i class="fa fa-users mr-2"></i>角色面板
+                </button>
+                <button class="game-tab-btn flex-1 py-3 text-sm font-medium text-light/50 hover:text-light/80 transition-colors" data-tab="map">
+                    <i class="fa fa-map mr-2"></i>冒险地图
+                </button>
+                <button class="game-tab-btn flex-1 py-3 text-sm font-medium text-light/50 hover:text-light/80 transition-colors" data-tab="inventory">
+                    <i class="fa fa-briefcase mr-2"></i>物品栏
+                </button>
+            </div>
+
+            <!-- 故事叙述标签内容 -->
+            <div id="narrative-tab" class="game-tab-content flex-1 overflow-hidden flex flex-col">
+                <!-- 故事内容区域 -->
+                <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded p-6 bg-stone bg-dark/60 bg-blur">
+                    <div class="max-w-3xl mx-auto space-y-8">
+                        <!-- DM 叙述 -->
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden border border-primary/50 flex-shrink-0">
+                                    <i class="fa fa-user-secret text-primary"></i>
+                                </div>
+                                <h3 class="font-fantasy text-primary text-lg">地下城主</h3>
+                                <span class="text-xs text-light/50 ml-2">10:45 AM</span>
+                            </div>
+                            <div class="bg-dark/70 rounded-xl p-5 border border-primary/20">
+                                <p class="text-light/90 leading-relaxed">你们穿过幽暗的通道，来到了一个宽敞的石室。墙壁上刻满了古老的符文，闪烁着微弱的蓝光。石室中央矗立着一座石台，上面放置着一个水晶球。当你们踏入房间时，水晶球突然光芒大作，石室的四个角落出现了火把，照亮了整个空间。</p>
+                                <p class="text-light/90 leading-relaxed mt-3">在石台的后面，你们发现了一扇紧闭的石门，上面刻着一个谜题："我没有生命，但我生长；我没有肺，但我需要空气；我没有嘴巴，但水会杀死我。我是什么？"</p>
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-primary/20 text-primary rounded-full text-xs">谜题</span>
+                                    <span class="px-3 py-1 bg-warning/20 text-warning rounded-full text-xs">关键抉择</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 玩家行动 -->
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-warning/30 flex items-center justify-center overflow-hidden border border-warning/50 flex-shrink-0">
+                                    <i class="fa fa-user text-warning"></i>
+                                </div>
+                                <h3 class="font-fantasy text-warning text-lg">勇者亚瑟</h3>
+                                <span class="text-xs text-light/50 ml-2">10:47 AM</span>
+                            </div>
+                            <div class="bg-dark/70 rounded-xl p-5 border border-warning/20 ml-10">
+                                <p class="text-light/90 leading-relaxed">我走向石台，仔细观察水晶球。"这个水晶球看起来很古老，也许和石门上的谜题有关。莉娜，你能侦测到任何魔法能量吗？"</p>
+                            </div>
+                        </div>
+
+                        <!-- 玩家行动 -->
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-info/30 flex items-center justify-center overflow-hidden border border-info/50 flex-shrink-0">
+                                    <i class="fa fa-user text-info"></i>
+                                </div>
+                                <h3 class="font-fantasy text-info text-lg">法师莉娜</h3>
+                                <span class="text-xs text-light/50 ml-2">10:49 AM</span>
+                            </div>
+                            <div class="bg-dark/70 rounded-xl p-5 border border-info/20 ml-10">
+                                <p class="text-light/90 leading-relaxed">我举起法杖，念动侦测魔法的咒语。"让我看看...水晶球散发着强烈的占卜魔法，石门上有元素魔法的痕迹。至于谜题，答案应该是'火'！"</p>
+                                <div class="mt-3 bg-info/10 border border-info/30 rounded-lg p-3">
+                                    <div class="flex items-center space-x-2 text-info mb-1">
+                                        <i class="fa fa-magic"></i>
+                                        <span class="text-sm font-medium">魔法侦测</span>
+                                    </div>
+                                    <p class="text-xs text-light/80">水晶球：占卜魔法（强烈），石门：元素魔法（中等），无危险魔法 aura</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DM 回应 -->
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden border border-primary/50 flex-shrink-0">
+                                    <i class="fa fa-user-secret text-primary"></i>
+                                </div>
+                                <h3 class="font-fantasy text-primary text-lg">地下城主</h3>
+                                <span class="text-xs text-light/50 ml-2">10:52 AM</span>
+                            </div>
+                            <div class="bg-dark/70 rounded-xl p-5 border border-primary/20">
+                                <p class="text-light/90 leading-relaxed">莉娜的魔法侦测揭示了水晶球的用途。当她说出"火"字时，石门上的符文开始发光。你们听到石门内部传来机械运转的声音，石门缓缓向内打开，露出一个更加黑暗的通道。</p>
+                                <div class="mt-4 flex justify-center">
+                                    <div class="relative w-full max-w-md h-40 bg-darker rounded-lg overflow-hidden border border-primary/30">
+                                        <img src="https://picsum.photos/id/1035/800/400" alt="打开的石门" class="w-full h-full object-cover opacity-70">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                                        <div class="absolute bottom-2 left-2 right-2 text-xs text-light/80 bg-darker/70 p-2 rounded">
+                                            石门缓缓打开，露出黑暗的通道
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 当前回合指示器 -->
+                        <div class="flex items-center justify-center mt-8">
+                            <div class="bg-primary/20 border border-primary/40 rounded-full px-4 py-2 flex items-center space-x-2 animate-pulse">
+                                <i class="fa fa-hourglass-half text-primary"></i>
+                                <span class="font-fantasy text-primary">冒险者的回合</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 行动输入区域 -->
+                <div class="border-t border-primary/30 bg-darker/90 bg-blur p-4">
+                    <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3">
+                        <div class="flex-1">
+                            <textarea id="actionInput" rows="2" placeholder="描述你的行动..." class="w-full px-4 py-3 bg-dark/50 border border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-light placeholder-light/40 resize-none"></textarea>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="diceRollBtn" class="flex-1 md:flex-none md:w-14 bg-dark/50 border border-primary/30 rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center">
+                                <i class="fa fa-dice text-primary"></i>
+                            </button>
+                            <button id="sendActionBtn" class="flex-1 md:flex-none md:w-24 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-colors flex items-center justify-center">
+                                <i class="fa fa-paper-plane mr-1"></i>
+                                <span>发送</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 角色面板标签内容 -->
+            <div id="characters-tab" class="game-tab-content hidden flex-1 overflow-hidden flex flex-col">
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div class="max-w-4xl mx-auto">
+                        <h2 class="text-2xl font-fantasy text-primary mb-6 text-center">冒险者 (盗贼)</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- 角色属性 -->
+                            <div class="md:col-span-1 space-y-6">
+                                <!-- 角色头像 -->
+                                <div class="bg-darker rounded-xl overflow-hidden border border-primary/30">
+                                    <div class="h-48 bg-primary/10 flex items-center justify-center">
+                                        <div class="w-32 h-32 rounded-full bg-primary/20 border-4 border-primary/50 flex items-center justify-center overflow-hidden">
+                                            <i class="fa fa-user-secret text-primary text-5xl"></i>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 text-center">
+                                        <h3 class="font-fantasy text-xl text-primary">冒险者</h3>
+                                        <p class="text-light/50 text-sm">人类 盗贼</p>
+                                    </div>
+                                </div>
+
+                                <!-- 基本属性 -->
+                                <div class="bg-darker rounded-xl p-5 border border-primary/30">
+                                    <h3 class="text-lg font-fantasy text-primary mb-4 pb-2 border-b border-primary/20">基本属性</h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-light/80">力量</span>
+                                                <span class="text-primary font-medium">12 (+1)</span>
+                                            </div>
+                                            <div class="w-full bg-dark rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 60%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-light/80">敏捷</span>
+                                                <span class="text-primary font-medium">16 (+3)</span>
+                                            </div>
+                                            <div class="w-full bg-dark rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 80%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-light/80">体质</span>
+                                                <span class="text-primary font-medium">14 (+2)</span>
+                                            </div>
+                                            <div class="w-full bg-dark rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 70%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-light/80">智力</span>
+                                                <span class="text-primary font-medium">13 (+1)</span>
+                                            </div>
+                                            <div class="w-full bg-dark rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 65%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-light/80">感知</span>
+                                                <span class="text-primary font-medium">15 (+2)</span>
+                                            </div>
+                                            <div class="w-full bg-dark rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 75%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-light/80">魅力</span>
+                                                <span class="text-primary font-medium">11 (+0)</span>
+                                            </div>
+                                            <div class="w-full bg-dark rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 55%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 角色详情 -->
+                            <div class="md:col-span-2 space-y-6">
+                                <!-- 状态信息 -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-darker rounded-xl p-5 border border-primary/30">
+                                        <h3 class="text-lg font-fantasy text-primary mb-4 pb-2 border-b border-primary/20">状态</h3>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <div class="flex justify-between text-sm mb-1">
+                                                    <span class="text-light/80">生命值</span>
+                                                    <span class="text-success font-medium">70/70</span>
+                                                </div>
+                                                <div class="w-full bg-dark rounded-full h-2.5">
+                                                    <div class="bg-success h-2.5 rounded-full" style="width: 100%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between text-sm mb-1">
+                                                    <span class="text-light/80">法力值</span>
+                                                    <span class="text-info font-medium">35/40</span>
+                                                </div>
+                                                <div class="w-full bg-dark rounded-full h-2.5">
+                                                    <div class="bg-info h-2.5 rounded-full" style="width: 87.5%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between text-sm mb-1">
+                                                    <span class="text-light/80">经验值</span>
+                                                    <span class="text-warning font-medium">450/1000</span>
+                                                </div>
+                                                <div class="w-full bg-dark rounded-full h-2.5">
+                                                    <div class="bg-warning h-2.5 rounded-full" style="width: 45%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-darker rounded-xl p-5 border border-primary/30">
+                                        <h3 class="text-lg font-fantasy text-primary mb-4 pb-2 border-b border-primary/20">能力</h3>
+                                        <div class="space-y-3">
+                                            <div class="flex items-start space-x-2">
+                                                <div class="bg-primary/20 p-1 rounded text-primary mt-0.5">
+                                                    <i class="fa fa-bolt"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-medium text-light">潜行</h4>
+                                                    <p class="text-xs text-light/60">可以在不被察觉的情况下移动</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-start space-x-2">
+                                                <div class="bg-primary/20 p-1 rounded text-primary mt-0.5">
+                                                    <i class="fa fa-lock"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-medium text-light">开锁</h4>
+                                                    <p class="text-xs text-light/60">可以打开复杂的锁具</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-start space-x-2">
+                                                <div class="bg-primary/20 p-1 rounded text-primary mt-0.5">
+                                                    <i class="fa fa-eye"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-sm font-medium text-light">察觉</h4>
+                                                    <p class="text-xs text-light/60">对陷阱和秘密门有敏锐的感知</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 技能 -->
+                                <div class="bg-darker rounded-xl p-5 border border-primary/30">
+                                    <h3 class="text-lg font-fantasy text-primary mb-4 pb-2 border-b border-primary/20">技能</h3>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">潜行</span>
+                                            <span class="text-primary font-medium">+7</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">开锁</span>
+                                            <span class="text-primary font-medium">+8</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">察觉</span>
+                                            <span class="text-primary font-medium">+6</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">巧手</span>
+                                            <span class="text-primary font-medium">+5</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">欺骗</span>
+                                            <span class="text-primary font-medium">+4</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">交涉</span>
+                                            <span class="text-primary font-medium">+3</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">隐匿</span>
+                                            <span class="text-primary font-medium">+7</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-light/80">敏捷</span>
+                                            <span class="text-primary font-medium">+6</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 装备 -->
+                                <div class="bg-darker rounded-xl p-5 border border-primary/30">
+                                    <h3 class="text-lg font-fantasy text-primary mb-4 pb-2 border-b border-primary/20">装备</h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-start space-x-3 p-2 hover:bg-dark/50 rounded-lg transition-colors">
+                                            <div class="w-8 h-8 bg-primary/20 rounded flex items-center justify-center flex-shrink-0">
+                                                <i class="fa fa-dagger text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-medium text-light">精制短刀</h4>
+                                                <p class="text-xs text-light/60">1d6 穿刺伤害，敏捷加成</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3 p-2 hover:bg-dark/50 rounded-lg transition-colors">
+                                            <div class="w-8 h-8 bg-primary/20 rounded flex items-center justify-center flex-shrink-0">
+                                                <i class="fa fa-shield text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-medium text-light">皮甲</h4>
+                                                <p class="text-xs text-light/60">防御等级 +3</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3 p-2 hover:bg-dark/50 rounded-lg transition-colors">
+                                            <div class="w-8 h-8 bg-primary/20 rounded flex items-center justify-center flex-shrink-0">
+                                                <i class="fa fa-flask text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-medium text-light">治疗药水 (2)</h4>
+                                                <p class="text-xs text-light/60">恢复 2d4+2 生命值</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3 p-2 hover:bg-dark/50 rounded-lg transition-colors">
+                                            <div class="w-8 h-8 bg-primary/20 rounded flex items-center justify-center flex-shrink-0">
+                                                <i class="fa fa-lock text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-medium text-light">盗贼工具包</h4>
+                                                <p class="text-xs text-light/60">包含开锁工具、撬棍和陷阱侦测设备</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他标签内容将通过JavaScript动态显示 -->
+            <div id="map-tab" class="game-tab-content hidden flex-1 overflow-hidden flex items-center justify-center">
+                <div class="text-center p-8">
+                    <i class="fa fa-map-o text-5xl text-primary/30 mb-4"></i>
+                    <h2 class="font-fantasy text-2xl text-primary/50">冒险地图</h2>
+                    <p class="text-light/40 mt-2">地图功能即将上线</p>
+                </div>
+            </div>
+
+            <div id="inventory-tab" class="game-tab-content hidden flex-1 overflow-hidden flex items-center justify-center">
+                <div class="text-center p-8">
+                    <i class="fa fa-briefcase text-5xl text-primary/30 mb-4"></i>
+                    <h2 class="font-fantasy text-2xl text-primary/50">物品栏</h2>
+                    <p class="text-light/40 mt-2">物品栏功能即将上线</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- 骰子滚动模态框 -->
+        <div id="diceModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+            <div class="bg-darker/90 backdrop-blur-md rounded-xl border border-primary/30 w-full max-w-md mx-4 transform transition-all duration-300 scale-95 opacity-0" id="diceModalContent">
+                <div class="p-6 border-b border-primary/20">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-fantasy text-primary">掷骰子</h3>
+                        <button id="closeDiceModalBtn" class="text-light/50 hover:text-light transition-colors">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <div id="diceResult" class="text-6xl font-fantasy text-primary min-h-[80px] flex items-center justify-center">
+                            ?
+                        </div>
+                        <p class="text-light/50 text-sm mt-2">点击下方骰子进行投掷</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button class="dice-btn bg-dark/50 border border-primary/30 rounded-lg p-4 hover:bg-primary/20 transition-colors flex flex-col items-center" data-dice="d4">
+                            <i class="fa fa-dice-four text-primary text-2xl mb-1"></i>
+                            <span class="text-sm">D4</span>
+                        </button>
+                        <button class="dice-btn bg-dark/50 border border-primary/30 rounded-lg p-4 hover:bg-primary/20 transition-colors flex flex-col items-center" data-dice="d6">
+                            <i class="fa fa-dice-six text-primary text-2xl mb-1"></i>
+                            <span class="text-sm">D6</span>
+                        </button>
+                        <button class="dice-btn bg-dark/50 border border-primary/30 rounded-lg p-4 hover:bg-primary/20 transition-colors flex flex-col items-center" data-dice="d8">
+                            <i class="fa fa-dice-eight text-primary text-2xl mb-1"></i>
+                            <span class="text-sm">D8</span>
+                        </button>
+                        <button class="dice-btn bg-dark/50 border border-primary/30 rounded-lg p-4 hover:bg-primary/20 transition-colors flex flex-col items-center" data-dice="d10">
+                            <i class="fa fa-dice-ten text-primary text-2xl mb-1"></i>
+                            <span class="text-sm">D10</span>
+                        </button>
+                        <button class="dice-btn bg-dark/50 border border-primary/30 rounded-lg p-4 hover:bg-primary/20 transition-colors flex flex-col items-center" data-dice="d12">
+                            <i class="fa fa-dice-twelve text-primary text-2xl mb-1"></i>
+                            <span class="text-sm">D12</span>
+                        </button>
+                        <button class="dice-btn bg-dark/50 border border-primary/30 rounded-lg p-4 hover:bg-primary/20 transition-colors flex flex-col items-center" data-dice="d20">
+                            <i class="fa fa-dice-twenty text-primary text-2xl mb-1"></i>
+                            <span class="text-sm">D20</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-primary/20 flex justify-end">
+                    <button id="confirmDiceBtn" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+                        使用结果
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // 标签页切换功能
+            document.querySelectorAll('.game-tab-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    // 移除所有标签和内容的活动状态
+                    document.querySelectorAll('.game-tab-btn').forEach(btn => {
+                        btn.classList.remove('active', 'text-primary', 'border-primary');
+                        btn.classList.add('text-light/50');
+                    });
+                    document.querySelectorAll('.game-tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+
+                    // 设置当前标签和内容为活动状态
+                    button.classList.add('active', 'text-primary', 'border-primary');
+                    button.classList.remove('text-light/50');
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                });
+            });
+
+            // 骰子模态框功能
+            const diceRollBtn = document.getElementById('diceRollBtn');
+            const diceModal = document.getElementById('diceModal');
+            const diceModalContent = document.getElementById('diceModalContent');
+            const closeDiceModalBtn = document.getElementById('closeDiceModalBtn');
+            const confirmDiceBtn = document.getElementById('confirmDiceBtn');
+            const diceResult = document.getElementById('diceResult');
+            let currentDiceResult = null;
+            let currentDiceType = null;
+
+            function openDiceModal() {
+                diceModal.classList.remove('hidden');
+                setTimeout(() => {
+                    diceModalContent.classList.remove('scale-95', 'opacity-0');
+                    diceModalContent.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            function closeDiceModal() {
+                diceModalContent.classList.remove('scale-100', 'opacity-100');
+                diceModalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    diceModal.classList.add('hidden');
+                    diceResult.textContent = '?';
+                    currentDiceResult = null;
+                    currentDiceType = null;
+                }, 300);
+            }
+
+            diceRollBtn.addEventListener('click', openDiceModal);
+            closeDiceModalBtn.addEventListener('click', closeDiceModal);
+            diceModal.addEventListener('click', (e) => {
+                if (e.target === diceModal) closeDiceModal();
+            });
+
+            // 骰子滚动功能
+            document.querySelectorAll('.dice-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const diceType = button.getAttribute('data-dice');
+                    const sides = parseInt(diceType.replace('d', ''));
+                    const result = Math.floor(Math.random() * sides) + 1;
+
+                    // 添加滚动动画
+                    diceResult.classList.add('dice-rolling');
+                    currentDiceResult = result;
+                    currentDiceType = diceType;
+
+                    // 动画结束后显示结果
+                    setTimeout(() => {
+                        diceResult.classList.remove('dice-rolling');
+                        diceResult.textContent = result;
+                    }, 1000);
+                });
+            });
+
+            // 确认骰子结果
+            confirmDiceBtn.addEventListener('click', () => {
+                if (currentDiceResult) {
+                    const actionInput = document.getElementById('actionInput');
+                    const currentText = actionInput.value;
+                    const diceText = `（掷出 ${currentDiceType}：${currentDiceResult}）`;
+
+                    actionInput.value = currentText ? `${currentText} ${diceText}` : diceText;
+                    closeDiceModal();
+                }
+            });
+
+            // 发送行动
+            document.getElementById('sendActionBtn').addEventListener('click', () => {
+                const actionInput = document.getElementById('actionInput');
+                const actionText = actionInput.value.trim();
+
+                if (actionText) {
+                    // 在实际应用中，这里会发送行动到服务器
+                    alert('行动已发送：' + actionText);
+                    actionInput.value = '';
+                } else {
+                    alert('请输入你的行动描述');
+                }
+            });
+
+            // 离开游戏
+            document.getElementById('leaveGameBtn').addEventListener('click', () => {
+                if (confirm('确定要离开当前游戏吗？')) {
+                    window.location.href = 'lobby.html';
+                }
+            });
+            document.getElementById('leaveGameMobileBtn').addEventListener('click', () => {
+                if (confirm('确定要离开当前游戏吗？')) {
+                    window.location.href = 'lobby.html';
+                }
+            });
+        </script>
+    </body>
+</html>

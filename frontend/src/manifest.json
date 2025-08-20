@@ -5,8 +5,8 @@
     "transformPx" : false,
     "icons" : [
         {
-            "sizes" : "分辨率，192x192",
-            "src" : "图片路径"
+            "sizes" : "192x192",
+            "src" : "./static/app-icon.png"
         }
     ],
     "versionName" : "1.0.2",

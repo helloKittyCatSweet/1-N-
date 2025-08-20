@@ -23,7 +23,7 @@
 		data() {
 			return {
 				refreshing: false,
-				loadMoreText: '加载中...',
+				loadMoreText: 'Loading...',
 				dataList: [],
 				id: 0,
 				fetchPageNum: 0
@@ -31,7 +31,7 @@
 		},
 		onLoad(e) {
 			uni.setNavigationBarTitle({
-				title: '专题：' + e.type
+				title: 'Topic: ' + e.type
 			});
 			this.id = e.id;
 			// 防止app里由于渲染导致转场动画卡顿

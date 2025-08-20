@@ -1,23 +1,23 @@
 {
-	"pages": [{
-			//pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
+		{
 			"path": "pages/new/new",
 			"style": {
-				"navigationBarTitleText": "最新",
+				"navigationBarTitleText": "News",
 				"enablePullDownRefresh": true
 			}
 		},
 		{
 			"path": "pages/hot/hot",
 			"style": {
-				"navigationBarTitleText": "最热",
+				"navigationBarTitleText": "Hotest",
 				"enablePullDownRefresh": true
 			}
 		},
 		{
 			"path": "pages/detail/detail",
 			"style": {
-				"navigationBarTitleText": "详情",
+				"navigationBarTitleText": "Details",
 				"navigationBarBackgroundColor": "#000000",
 				"backgroundColor": "#000000",
 				"app-plus": {
@@ -40,28 +40,28 @@
 		{
 			"path": "pages/tag/tag",
 			"style": {
-				"navigationBarTitleText": "分类",
+				"navigationBarTitleText": "Category",
 				"enablePullDownRefresh": false
 			}
 		},
 		{
 			"path": "pages/list/list",
 			"style": {
-				"navigationBarTitleText": "专题",
+				"navigationBarTitleText": "Topics",
 				"enablePullDownRefresh": true
 			}
 		},
 		{
 			"path": "pages/center/center",
 			"style": {
-				"navigationBarTitleText": "个人中心",
+				"navigationBarTitleText": "My Home",
 				"enablePullDownRefresh": false
 			}
 		},
 		{
 			"path": "pages/login/login",
 			"style": {
-				"navigationBarTitleText": "登录"
+				"navigationBarTitleText": "Login"
 			}
 		},
 		{
@@ -71,7 +71,7 @@
 		{
 			"path": "pages/meme/index",
 			"style": {
-				"navigationBarTitleText": "梗图展示"
+				"navigationBarTitleText": "My MEMEs!"
 			}
     	}
 	],
@@ -90,26 +90,36 @@
 				"pagePath": "pages/new/new",
 				"iconPath": "static/index-0.png",
 				"selectedIconPath": "static/index-1.png",
-				"text": "最新"
+				"text": "News"
 			},
 			{
 				"pagePath": "pages/hot/hot",
 				"iconPath": "static/hot-0.png",
 				"selectedIconPath": "static/hot-1.png",
-				"text": "推荐"
+				"text": "Hotest"
 			},
 			{
 				"pagePath": "pages/tag/tag",
 				"iconPath": "static/tag-0.png",
 				"selectedIconPath": "static/tag-1.png",
-				"text": "分类"
+				"text": "Category"
 			},
 			{
 				"pagePath": "pages/center/center",
 				"iconPath": "static/center-0.png",
 				"selectedIconPath": "static/center-1.png",
-				"text": "我的"
+				"text": "My Home"
+			},
+			{
+				"pagePath": "pages/meme/index",
+				"iconPath": "static/innovate-0.png",
+				"selectedIconPath": "static/innovate-1.png",
+				"text": "Create MY MEME"
 			}
 		]
-	}
+	},
+	"router": {
+		"mode": "hash",
+		"base": "/"
+  	}
 }

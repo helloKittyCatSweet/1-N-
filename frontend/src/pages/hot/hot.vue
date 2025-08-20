@@ -14,7 +14,7 @@
 				</view>
 			</view>
 		</view>
-		<text class="loadMore">加载中...</text>
+		<text class="loadMore">Loading...</text>
 	</view>
 </template>
 

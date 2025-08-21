@@ -1,19 +1,26 @@
-import { Schema, model } from 'mongoose';
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../config/database.js'
 
-const UserSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+class User extends Model{}
+
+User.init({
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    }
+
+}, {
+    sequelize,
+    modelName: 'User'
 });
 
-export default model('User', UserSchema);
+export default User;

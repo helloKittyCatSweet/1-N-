@@ -118,9 +118,9 @@
 			},
 			{
 				"pagePath": "pages/meme/index",
-				"iconPath": "static/innovate-0.png",
-				"selectedIconPath": "static/innovate-1.png",
-				"text": "Create MY MEME"
+				"iconPath": "",
+				"selectedIconPath": "",
+				"text": ""
 			}
 		]
 	},

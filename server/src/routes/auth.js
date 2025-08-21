@@ -1,7 +1,9 @@
 import { Router } from 'express';
 const router = Router();
-import { register, login, getCurrentUser } from '../controllers/authController';
-import auth from '../middleware/auth';
+
+// 导入控制器和中间件
+import { register, login, getCurrentUser } from '../controllers/authController.js';
+import auth from '../middleware/auth.js';
 
 // 注册用户
 router.post('/register', register);

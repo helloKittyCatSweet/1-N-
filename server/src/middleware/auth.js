@@ -1,4 +1,5 @@
-import { verify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { verify } = jwt;
 
 export default function(req, res, next) {
   // 从请求头获取令牌

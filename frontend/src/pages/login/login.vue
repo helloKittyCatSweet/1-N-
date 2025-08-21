@@ -49,6 +49,9 @@
 						uni.setStorageSync('token', res.data.token);
 						uni.setStorageSync('user', JSON.stringify(res.data.user));
 						
+						// 更新选项卡
+						this.$emit('updateTabBar');
+
 						// 显示成功消息
 						uni.showToast({
 							title: '登录成功',

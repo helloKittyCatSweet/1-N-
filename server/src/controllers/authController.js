@@ -1,6 +1,8 @@
-import User from '../models/User';
+import User from '../models/User.js';
+
 import { genSalt, hash, compare } from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { sign } = jwt;
 
 // 注册用户
 export async function register(req, res) {
@@ -8,7 +10,7 @@ export async function register(req, res) {
     const { username, password } = req.body;
 
     // 检查用户是否已存在
-    let user = await User.findOne({ username });
+    let user = await User.findOne({ where: { username } });
     if (user) {
       return res.status(400).json({ msg: '用户已存在' });
     }
@@ -54,7 +56,7 @@ export async function login(req, res) {
     const { username, password } = req.body;
 
     // 检查用户是否存在
-    let user = await User.findOne({ username });
+    let user = await User.findOne({ where: { username } });
     if (!user) {
       return res.status(400).json({ msg: '用户不存在' });
     }

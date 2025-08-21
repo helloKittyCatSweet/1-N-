@@ -65,6 +65,12 @@
 			}
 		},
 		{
+			"path": "pages/register/register",
+			"style": {
+				"navigationBarTitleText": "Register"
+			}
+		},
+		{
 			"path": "pages/about/about",
 			"style": {}
 		},

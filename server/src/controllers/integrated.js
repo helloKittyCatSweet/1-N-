@@ -1,3 +1,4 @@
+// Updated version based on working CommonJS code
 import MemeGenerator from '../index.js';
 import { GoogleGenAI } from '@google/genai';
 import { writeFileSync } from 'node:fs';
@@ -5,26 +6,23 @@ import { GEMINI_API_KEY } from '../utils/config.js';
 
 async function generateMemeImage() {
     try {
-        // 1. 首先生成吐槽文本
+        // 1. First generate meme text
         const generator = new MemeGenerator();
-        console.log('开始生成吐槽文本...');
+        console.log('🚀 Starting meme generation...');
         const result = await generator.generateMeme('programmer');
 
         if (!result.success) {
             throw new Error(result.error);
         }
 
-        console.log('生成的吐槽:', result.data.content);
+        console.log('📝 Generated text:', result.data.content);
 
-        // 2. 用生成的文本作为提示词生成图片
-        const ai = new GoogleGenAI(GEMINI_API_KEY);
-        const model = ai.getGenerativeModel({
-            model: 'gemini-1.5-flash-latest',
-        });
+        // 2. Use generated text as prompt to generate image
+        const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
+        
+        console.log('🔄 Generating image...');
 
-        console.log('开始生成图片...');
-
-        const genRes = await model.generateContent({
+        const genRes = await ai.models.generateContent({
             model: 'gemini-2.0-flash-preview-image-generation',
             contents: [
                 {
@@ -37,36 +35,53 @@ Make it humorous and entertaining. If appropriate, render the caption clearly in
                 }
             ],
             // 关键：声明双模态
-            generationConfig: {
-                responseMimeType: 'image/png',
-                responseModalities: ['IMAGE']
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+                // 推荐：要求图片以 PNG 返回，便于读取 inlineData
+                // responseMimeType: 'image/png'
             }
         });
 
         const response = genRes;
-        // 处理图片生成结果
-        // console.log("这是我的断点")
+        // Process image generation result
         const candidate = response?.candidates?.[0];
         if (!candidate) throw new Error('No candidates returned from image model');
 
         for (const part of candidate.content.parts) {
             if (part.text) {
-                console.log('图片描述:', part.text);
+                console.log('📝 Image description:', part.text);
             } else if (part.inlineData) {
                 const buffer = Buffer.from(part.inlineData.data, 'base64');
                 const outputFile = `meme_${Date.now()}.png`;
                 writeFileSync(outputFile, buffer);
-                console.log(`图片已保存为 ${outputFile}`);
+                console.log(`✅ Image saved as ${outputFile}`);
             }
         }
     } catch (error) {
-        console.error('生成过程出错:', error.message);
+        console.error('❌ Error:', error.message);
     }
+    
+    console.log('✅ Process completed');
 }
 
-// 运行集成功能 
-if (import.meta.url === `file://${process.argv[1]}`) {
-    generateMemeImage().catch(console.error);
+// Run integrated functionality - use multiple ways to detect direct execution
+const isDirectExecution = 
+    import.meta.url === `file://${process.argv[1]}` || 
+    process.argv[1]?.endsWith('integrated.js') ||
+    process.argv[1]?.includes('integrated');
+
+if (isDirectExecution) {
+    generateMemeImage()
+        .then(() => {
+            console.log('🎉 All done!');
+            process.exit(0);
+        })
+        .catch((error) => {
+            console.error('❌ Fatal error:', error);
+            process.exit(1);
+        });
+} else {
+    console.log('📋 Module imported, not executed directly');
 }
 
 export default generateMemeImage;

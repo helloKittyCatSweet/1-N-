@@ -56,11 +56,6 @@ async function demo() {
 }
 
 // 如果直接运行此文件，执行演示
-// src/index.js
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
-
-// 如果直接运行此文件，执行演示
 if (import.meta.url === `file://${process.argv[1]}`) {
   demo().catch(console.error);
 }

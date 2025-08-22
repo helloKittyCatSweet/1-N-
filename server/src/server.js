@@ -1,44 +1,49 @@
 import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import sequelize from './config/database.js';
 import authRoutes from './routes/auth.js';
 
-// 加载环境变量
-config({ path: '../.env' });
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from the server directory
+config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
-// 中间件
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// 使用配置文件中的 Sequelize 实例
-
-// 测试数据库连接
+// Test database connection
 sequelize
   .authenticate()
   .then(() => {
-    console.log('MySQL连接成功');
-    // 同步模型到数据库
+    console.log('MySQL connection successful');
+    // Sync models to database
     sequelize.sync({ alter: true }).then(() => {
-      console.log('数据库模型同步完成');
+      console.log('Database models synchronized');
     });
   })
   .catch((err) => {
-    console.error('MySQL连接失败:', err);
+    console.error('MySQL connection failed:', err);
+    console.log('Continuing without database connection...');
   });
 
-// 路由
+// Routes
 app.use('/api/auth', authRoutes);
 
-// 测试路由
+// Test route
 app.get('/', (req, res) => {
-  res.send('API运行中...');
+  res.send('API is running...');
 });
 
-// 启动服务器
+// Start server
 app.listen(PORT, () => {
-  console.log(`服务器运行在端口 ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

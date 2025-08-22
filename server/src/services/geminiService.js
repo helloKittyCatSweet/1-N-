@@ -4,23 +4,34 @@ import PromptService from './promptService.js';
 
 class GeminiService {
     constructor() {
-        // 直接用 API 密钥初始化 Gemini 实例
-        this.genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        this.model = this.genAI.getGenerativeModel({ model: MODEL_NAME });
+        // Check if API key is available
+        if (!GEMINI_API_KEY) {
+            console.warn('GEMINI_API_KEY not set, service will not work properly');
+            return;
+        }
+        
+        try {
+            // Initialize Gemini instance with API key
+            this.genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+            this.model = this.genAI.getGenerativeModel({ model: MODEL_NAME });
+        } catch (error) {
+            console.error('Failed to initialize Gemini service:', error.message);
+        }
     }
 
     /**
-     * 生成吐槽内容
-     * @param {string} keyword - 用户输入的关键词
-     * @returns {Promise<string>} - 生成的吐槽内容
+     * Generate meme content
+     * @param {string} keyword - User input keyword
+     * @returns {Promise<object>} - Generated content
      */
-
     async generateMeme(keyword) {
         try {
-            // 构建提示词
+            if (!this.model) {
+                throw new Error('Gemini service not properly initialized');
+            }
+            
+            // Build prompt
             const prompt = PromptService.buildMemePrompt(keyword);
-
-            // 按照 target.txt 示例，直接传递字符串给 contents
 
             const result = await this.model.generateContent({
                 contents: [
@@ -31,24 +42,27 @@ class GeminiService {
                 ]
             });
 
-
-            // 获取生成的文本内容
+            // Get generated text content
             const response = result.response;
             const text = response.text();
 
             return { text };
         } catch (error) {
-            throw new Error(`生成吐槽失败: ${error.message}`);
+            throw new Error(`Failed to generate meme: ${error.message}`);
         }
     }
 
     /**
-     * 内容安全检查（可选，如不需要可移除）
-     * @param {string} content - 需要检查的内容
-     * @returns {Promise<boolean>} - 是否安全
+     * Content safety check (optional)
+     * @param {string} content - Content to check
+     * @returns {Promise<boolean>} - Whether content is safe
      */
     async performSafetyCheck(content) {
         try {
+            if (!this.model) {
+                throw new Error('Gemini service not properly initialized');
+            }
+            
             const prompt = PromptService.buildSafetyCheckPrompt(content);
             const result = await this.model.generateContent({
                 contents: [
@@ -61,7 +75,7 @@ class GeminiService {
             const response = result.response;
             return response.text().includes('安全');
         } catch (error) {
-            console.error('安全检查失败:', error);
+            console.error('Safety check failed:', error);
             return false;
         }
     }

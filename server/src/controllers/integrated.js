@@ -1,15 +1,19 @@
 // Updated version based on working CommonJS code
 import MemeGenerator from '../index.js';
 import { GoogleGenAI } from '@google/genai';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { GEMINI_API_KEY } from '../utils/config.js';
 
-async function generateMemeImage() {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+async function generateMemeImage(keyword = 'programmer') {
     try {
-        // 1. First generate meme text
         const generator = new MemeGenerator();
         console.log('🚀 Starting meme generation...');
-        const result = await generator.generateMeme('programmer');
+        const result = await generator.generateMeme(keyword);
 
         if (!result.success) {
             throw new Error(result.error);
@@ -17,9 +21,7 @@ async function generateMemeImage() {
 
         console.log('📝 Generated text:', result.data.content);
 
-        // 2. Use generated text as prompt to generate image
-        const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
-        
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
         console.log('🔄 Generating image...');
 
         const genRes = await ai.models.generateContent({
@@ -29,21 +31,17 @@ async function generateMemeImage() {
                     role: 'user',
                     parts: [
                         {
-                            text: `Create a funny meme image based on this caption: ${result.data.content}
-Make it humorous and entertaining. If appropriate, render the caption clearly inside the image.` }
+                            text: `Create a funny meme image based on this caption: ${result.data.content}\nMake it humorous and entertaining. If appropriate, render the caption clearly inside the image.`
+                        }
                     ]
                 }
             ],
-            // 关键：声明双模态
             config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-                // 推荐：要求图片以 PNG 返回，便于读取 inlineData
-                // responseMimeType: 'image/png'
+                responseModalities: ['TEXT', 'IMAGE']
             }
         });
 
         const response = genRes;
-        // Process image generation result
         const candidate = response?.candidates?.[0];
         if (!candidate) throw new Error('No candidates returned from image model');
 
@@ -52,16 +50,21 @@ Make it humorous and entertaining. If appropriate, render the caption clearly in
                 console.log('📝 Image description:', part.text);
             } else if (part.inlineData) {
                 const buffer = Buffer.from(part.inlineData.data, 'base64');
-                const outputFile = `meme_${Date.now()}.png`;
-                writeFileSync(outputFile, buffer);
-                console.log(`✅ Image saved as ${outputFile}`);
+                // save under server/src/memes
+                const memesDir = path.join(__dirname, '../memes');
+                mkdirSync(memesDir, { recursive: true });
+                const fileName = `meme_${Date.now()}.png`;
+                const outputPath = path.join(memesDir, fileName);
+                writeFileSync(outputPath, buffer);
+                // return relative path from server/src
+                return `memes/${fileName}`;
             }
         }
+        throw new Error('No inline image data found');
     } catch (error) {
         console.error('❌ Error:', error.message);
+        throw error;
     }
-    
-    console.log('✅ Process completed');
 }
 
 // Run integrated functionality - use multiple ways to detect direct execution

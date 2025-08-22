@@ -43,8 +43,8 @@
     <!-- 右侧：用户已有图列表 -->
     <view class="right-section">
       <view class="right-header">
-        <view class="right-title">我的创作</view>
-        <view class="right-stats">共 {{ memeList.length }} 张</view>
+        <view class="right-title">My Works</view>
+        <view class="right-stats">total {{ memeList.length }} works</view>
       </view>
       
       <scroll-view scroll-y class="right-list">
@@ -72,8 +72,8 @@
         
         <view v-if="memeList.length === 0" class="empty-right">
           <view class="empty-icon">🎨</view>
-          <text class="empty-text">还没有创作哦～</text>
-          <text class="empty-desc">输入关键词开始创作吧！</text>
+          <text class="empty-text">No works yet</text>
+          <text class="empty-desc">Input keywords to start</text>
         </view>
       </scroll-view>
     </view>
@@ -87,22 +87,22 @@ export default {
     return {
       keyword: "",
       memeList: [
-        // 示例数据，展示右侧区域的功能
-        {
-          url: "https://via.placeholder.com/400x300/ff6b6b/ffffff?text=加班",
-          caption: "加班",
-          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1天前
-        },
-        {
-          url: "https://via.placeholder.com/400x300/4ecdc4/ffffff?text=咖啡",
-          caption: "咖啡",
-          timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2天前
-        },
-        {
-          url: "https://via.placeholder.com/400x300/45b7d1/ffffff?text=程序员",
-          caption: "程序员",
-          timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3天前
-        }
+        // // 示例数据，展示右侧区域的功能
+        // {
+        //   url: "https://via.placeholder.com/400x300/ff6b6b/ffffff?text=加班",
+        //   caption: "加班",
+        //   timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1天前
+        // },
+        // {
+        //   url: "https://via.placeholder.com/400x300/4ecdc4/ffffff?text=咖啡",
+        //   caption: "咖啡",
+        //   timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2天前
+        // },
+        // {
+        //   url: "https://via.placeholder.com/400x300/45b7d1/ffffff?text=程序员",
+        //   caption: "程序员",
+        //   timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3天前
+        // }
       ],
       currentMeme: {},        // 左侧大图当前展示
       savePath: "",           // 保存路径
@@ -111,19 +111,60 @@ export default {
   },
   methods: {
     /* 点击搜索/生成后把返回结果推到 memeList 并设为当前 */
-    async handleSearch() {
-      if (!this.keyword) return;
-      /* 这里换成你真实的 API 调用 */
+async handleSearch() {
+  if (!this.keyword) return;
+  
+  uni.showLoading({ title: 'generating...' });
+  
+  try {
+    const response = await uni.request({
+      url: 'http://localhost:5000/api/generate-meme',
+      method: 'POST',
+      data: { keyword: this.keyword },
+      header: {
+        'content-type': 'application/json'
+      }
+    });
+
+    const result = response[1].data; // uni.request 返回的结果是一个数组，第二项是响应数据
+    console.log('API返回数据:', response[1].data);
+
+    if (result.success) {
       const newMeme = {
-        url: `https://via.placeholder.com/400x300/667eea/ffffff?text=${encodeURIComponent(
-          this.keyword
-        )}`,
+        url: result.url, // 使用返回的URL
         caption: this.keyword,
-        timestamp: new Date().toISOString() // Add timestamp
+        timestamp: new Date().toISOString()
       };
+      
+      console.log('创建新梗图:', {
+        caption: newMeme.caption,
+        url: newMeme.url
+      });
+      
       this.memeList.unshift(newMeme);
       this.currentMeme = newMeme;
-    },
+      console.log(this.currentMeme.url);
+      
+      uni.showToast({ 
+        title: '生成成功', 
+        icon: 'success' 
+      });
+    } else {
+      uni.showToast({ 
+        title: result.error || '生成失败', 
+        icon: 'none' 
+      });
+    }
+  } catch (error) {
+    console.error('API调用失败:', error);
+    uni.showToast({ 
+      title: '网络错误', 
+      icon: 'none' 
+    });
+  } finally {
+    // uni.hideLoading();
+  }
+},
     
     /* 保存图片 */
     async handleSave() {
@@ -398,7 +439,7 @@ export default {
 }
 
 .image-display {
-  flex: 1;
+  flex: 0.8;
   border-radius: 16rpx;
   overflow: hidden;
   background: #f1f3f5;

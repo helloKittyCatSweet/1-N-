@@ -68,10 +68,9 @@
 
       <!-- 空态骨架 -->
       <view v-if="!lists.length" class="skeleton">
-        <view class="s-item" v-for="n in 8" :key="n"></view>
+        <view class="s-item" v-for="n in 2" :key="n"></view>
       </view>
 
-      <view class="loadMore">Loading...</view>
     </view>
   </view>
 </template>
@@ -130,7 +129,6 @@ export default {
       }
     });
   },
-  onReachBottom() { this.getData(); },
   methods: {
     selectCategory(c) {
       if ((this.activeCat && this.activeCat.key) === c.key) return;
@@ -147,7 +145,7 @@ export default {
       const typeParam = (this.activeCat && this.activeCat.type) || '';
       const idParam   = (this.activeCat && this.activeCat.id)   || '';
       const url = this.$serverUrl +
-        `/api/picture/posts.php?page=${page}&per_page=12&type=${encodeURIComponent(typeParam)}&id=${encodeURIComponent(idParam)}`;
+        `/api/picture/posts.php?page=${page}&per_page=2&type=${encodeURIComponent(typeParam)}&id=${encodeURIComponent(idParam)}`;
 
       uni.request({
         url,

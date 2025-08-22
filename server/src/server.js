@@ -1,13 +1,11 @@
 import express from 'express';
-import { createConnection } from 'mysql2/promise';
 import cors from 'cors';
 import { config } from 'dotenv';
 import sequelize from './config/database.js';
 import authRoutes from './routes/auth.js';
-import User from './models/User.js';
 
 // 加载环境变量
-config();
+config({ path: '../.env' });
 
 const app = express();
 const PORT = process.env.PORT;

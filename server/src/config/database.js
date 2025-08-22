@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize';
 import { config } from 'dotenv';
 
 // 加载环境变量
-config();
+config({ path: '../.env' });
 
 // 创建 Sequelize 实例
 const sequelize = new Sequelize(

@@ -1,18 +1,24 @@
 <template>
 	<view class="index">
-		<block v-for="item in list" :key="item.img_src">
-			<view class="card" @click="goDetail(item)">
-				<image class="card-img" :src="item.img_src" mode="aspectFill"></image>
-				<text class="card-num-view">{{item.img_num}}P</text>
-				<view class="card-bottm row">
-					<view class="car-title-view row">
-						<text class="card-title">{{item.title}}</text>
+		<!-- 添加一个容器来包裹卡片列表 -->
+		<view class="card-container" style="display: flex; flex-wrap: wrap; justify-content: flex-start; padding: 12px;">
+			<block v-for="item in list" :key="item.img_src">
+				<!-- 修改卡片宽度为42%，减小边距至4% -->
+				<view class="card" @click="goDetail(item)" style="width: 41%; margin: 0 4% 20px 4%;">
+					<image class="card-img" :src="item.img_src" mode="aspectFill" style="width: 100%; height: 180px; border-radius: 8px;"></image>
+					<text class="card-num-view" style="position: absolute; right: 10px; top: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px;">{{item.img_num}}P</text>
+					<view class="card-bottm row" style="padding: 8px 0;">
+						<view class="car-title-view row" style="flex: 1;">
+							<text class="card-title" style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{item.title}}</text>
+						</view>
+						<view @click.stop="share(item)" class="card-share-view" style="padding: 0 10px;">
+							<text style="font-size: 20px;">📤</text>
+						</view>
 					</view>
-					<view @click.stop="share(item)" class="card-share-view"></view>
 				</view>
-			</view>
-		</block>
-		<text class="loadMore">加载中...</text>
+			</block>
+		</view>
+		<text class="loadMore" style="text-align: center; padding: 10px 0; display: block;">加载中...</text>
 	</view>
 </template>
 

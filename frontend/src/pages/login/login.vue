@@ -127,7 +127,33 @@
 
 .login,
 .register {
-  border-radius: 4px;
-  padding: 10px;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;                  /* 按钮文字白色 */
+  font-weight: bold;
+  border: none;
+}
+
+/* 登录按钮：蓝色渐变 */
+.login {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+/* 注册按钮：绿色渐变 */
+.register {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  box-shadow: 0 4px 12px rgba(67, 233, 123, 0.4);
+}
+
+/* 按下效果 */
+.login:active,
+.register:active {
+  opacity: 0.85;
+  transform: scale(0.98);
 }
 </style>

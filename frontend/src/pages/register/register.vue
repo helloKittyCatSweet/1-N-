@@ -103,27 +103,44 @@
   box-sizing: border-box;
 }
 
-.input-view {
-  display: flex;
-  flex-direction: column;
+/* 输入行：横向布局 */
+/* 一行两列：左标签，右输入框 */
+.input-view{
+  display: grid;
+  grid-template-columns: 160px 1fr;  /* 左列固定宽，右列自适应 */
+  align-items: center;
+  column-gap: 14px;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
-.label-view {
-  margin-bottom: 5px;
-}
-
-.label {
+/* 标签不换行并靠右对齐更整齐 */
+.label{
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
+  white-space: nowrap;    /* 🚫 不自动换行 */
+  text-align: right;
+  margin: 0;
 }
 
-.input {
+/* 输入框占满右侧列 */
+.input{
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-  font-size: 14px;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: #fff;
+}
+
+/* 小屏改为上下堆叠，避免拥挤 */
+@media (max-width: 480px){
+  .input-view{
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+  }
+  .label{ text-align: left; }
 }
 
 .button-view {
@@ -135,7 +152,30 @@
 
 .login,
 .register {
-  border-radius: 4px;
-  padding: 10px;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff; 
+  font-weight: bold;
+  border: none;
+}
+
+.register {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  box-shadow: 0 4px 12px rgba(67, 233, 123, 0.4);
+}
+
+.login {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+.login:active,
+.register:active {
+  opacity: 0.85;
+  transform: scale(0.98);
 }
 </style>

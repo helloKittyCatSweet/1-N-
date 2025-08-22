@@ -1,31 +1,61 @@
 <template>
   <view class="meme-container">
     <view class="container">
-      <view class="title">梗图展示</view>
-      <view class="meme-list">
-        <!-- 加载状态 -->
-        <view v-if="loading" class="loading">
-          <view class="loading-spinner"></view>
+      <view class="title">梗图搜索 & 保存</view>
+
+      <!-- 关键词 -->
+      <view class="input-group">
+        <text>关键词：</text>
+        <input v-model="keyword" placeholder="输入你想要的梗图关键词" />
+      </view>
+
+      <!-- 本地保存目录 -->
+      <view class="input-group">
+        <text>保存到：</text>
+        <!-- webkitdirectory 允许选择文件夹 -->
+        <input
+          type="file"
+          webkitdirectory
+          directory
+          @change="handleDirSelect"
+          style="width:100%;"
+        />
+        <text v-if="savePath">{{ savePath }}</text>
+      </view>
+
+      <button
+        type="primary"
+        :disabled="!keyword || !savePath"
+        @tap="handleSearch"
+      >
+        搜索并保存
+      </button>
+
+      <!-- 加载/空状态/结果列表 保持原结构 -->
+      <view v-if="loading" class="loading">
+        <view class="loading-spinner"></view>
+      </view>
+      <view v-else-if="memeList.length === 0" class="empty-state">
+        <text>😢</text>
+        <text>暂无结果</text>
+      </view>
+      <view
+        v-else
+        v-for="(meme, index) in memeList"
+        :key="index"
+        class="meme-item"
+      >
+        <view class="meme-image-container">
+          <image
+            :src="meme.url"
+            class="meme-image"
+            mode="aspectFill"
+            @load="meme.loaded = true"
+            @error="meme.loaded = false; meme.error = true"
+            v-show="!meme.error"
+          />
         </view>
-        <!-- 空状态 -->
-        <view v-else-if="memeList.length === 0" class="empty-state">
-          <text>😢</text>
-          <text>暂无梗图数据</text>
-        </view>
-        <!-- 梗图列表 -->
-        <view v-else v-for="(meme, index) in memeList" :key="index" class="meme-item">
-          <view class="meme-image-container">
-            <image 
-                :src="meme.url" 
-                :alt="meme.caption"
-                class="meme-image"
-                @load="meme.loaded = true"
-                @error="meme.loaded = false; meme.error = true"
-                v-show="!meme.error"
-                />
-            </view>
-          <view class="meme-caption">{{ meme.caption }}</view>
-        </view>
+        <view class="meme-caption">{{ meme.caption }}</view>
       </view>
     </view>
   </view>
@@ -35,116 +65,65 @@
 export default {
   data() {
     return {
+      keyword: "",
+      savePath: "",            // 本地目录绝对路径
       loading: false,
-      memeList: [
-        {
-          url: 'https://photo.16pic.com/00/53/26/16pic_5326745_b.jpg',
-          caption: '程序员日常：代码一次过',
-          loaded: false,
-          error: false
-        },
-        {
-          url: 'https://img.zcool.cn/community/01d72060d15c5c11013e87f414a2.jpg?x-oss-process=image/resize,w_1200,h_675,limit_0/auto-orient,1/sharpen,100/format,webp/quality,Q_100',
-          caption: '当我尝试修复一个bug，却创造了十个新bug',
-          loaded: false,
-          error: false
-        },
-        {
-          url: 'https://img.zcool.cn/community/01e2a5ca06e06a801214168c63964.jpg?x-oss-process=image/resize,w_200,h_675,limit_0/auto-orient,1/sharpen,100/format,webp/quality,Q_100',
-          caption: '产品经理又改需求了',
-          loaded: false,
-          error: false
-        },
-        {
-          url: 'https://tva1.sinaimg.cn/large/007S8ZIlgy1gexpkzj305k0t.jpg',
-          caption: '测试一下无效图片链接',
-          loaded: false,
-          error: false
-        }
-      ]
-    }
-  },
-  mounted() {
-    this.handleLoad();
+      memeList: []             // { url, caption, loaded, error }
+    };
   },
   methods: {
-    handleLoad() {
+    /* 用户选了文件夹后拿到路径 */
+    handleDirSelect(e) {
+      // e.detail.files[0] 的 path 就是所选文件夹
+      if (e.detail.files.length) {
+        this.savePath = e.detail.files[0].path.replace(/[^\\/]+$/, ""); // 去掉文件名
+      }
+    },
+
+    /* 点击搜索 */
+    async handleSearch() {
+      if (!this.keyword || !this.savePath) return;
+
       this.loading = true;
-      setTimeout(() => {
+      try {
+        // 把关键词和目录发给后端
+        const res = await uni.request({
+          url: "http://localhost:5000/api/meme/search", // 换成你的后端地址
+          method: "POST",
+          data: { keyword: this.keyword, saveDir: this.savePath }
+        });
+
+        // 后端返回 [{ fileName, caption, url }] ，url 可以是本地 file://
+        this.memeList = (res.data || []).map(it => ({
+          url: "file://" + it.fileName, // 本地绝对路径
+          caption: it.caption,
+          loaded: false,
+          error: false
+        }));
+      } catch (err) {
+        uni.showToast({ title: "搜索失败", icon: "none" });
+      } finally {
         this.loading = false;
-        // 故意设置一个无效URL来测试错误处理
-        this.memeList[3].url = 'https://example.com/invalid-image.jpg';
-      }, 1500);
+      }
     }
   }
-}
+};
 </script>
 
 <style scoped>
-.meme-container {
-  padding: 20px;
-  background-color: #FFFFFF;
+/* 复用你原来的样式，这里只补一点输入框样式 */
+.input-group {
+  margin: 20rpx 0;
 }
-
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.meme-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.meme-item {
+input[type="text"],
+input[type="file"] {
   border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px;
-  width: 300px;
-  margin-bottom: 20px;
-}
-
-.meme-image-container {
+  padding: 10rpx;
+  border-radius: 6rpx;
   width: 100%;
-  height: 200px;
-  overflow: hidden;
 }
-
-.meme-image {
-  width: 100%;
-  height: 100%;
+button {
+  margin: 30rpx 0;
 }
-
-.meme-caption {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.loading {
-  text-align: center;
-  padding: 20px;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #FF80AB;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.empty-state {
-  text-align: center;
-  padding: 20px;
-}
+/* 其余样式保持不变，直接拷贝你原文件的即可 */
 </style>

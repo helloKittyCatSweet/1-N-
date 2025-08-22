@@ -28,7 +28,51 @@
 			return {
 				refreshing: false,
 				providerList: [],
-				list: [],
+				list: [
+				{
+					"id": 1,
+					"img_src": "http://localhost:5000/memes/meme_1755849253848.png",
+					"img_num": 12,
+					"title": "elder people",
+					"category": "landscape"
+				},
+				{
+					"id": 2,
+					"img_src": "http://localhost:5000/memes/meme_1755849319925.png",
+					"img_num": 8,
+					"title": "cuirous men",
+					"category": "food"
+				},
+				{
+					"id": 3,
+					"img_src": "http://localhost:5000/memes/meme_1755849350021.png",
+					"img_num": 24,
+					"title": "twins",
+					"category": "pet"
+				},
+				{
+					"id": 4,
+					"img_src": "http://localhost:5000/memes/meme_1755851424826.png",
+					"img_num": 6,
+					"title": "electric",
+					"category": "city"
+				},
+				{
+					"id": 5,
+					"img_src": "http://localhost:5000/memes/meme_1755854327564.png",
+					"img_num": 18,
+					"title": "kid",
+					"category": "portrait"
+				},
+				{
+					"id": 6,
+					"img_src": "http://localhost:5000/memes/meme_1755854079729.png",
+					"img_num": 18,
+					"title": "couple",
+
+					"category": "portrait"
+				}
+				],
 				fetchPageNum: 1
 			}
 		},

@@ -67,7 +67,50 @@ export default {
   data() {
     return {
       // 列表数据
-      lists: [],
+      lists: [
+  {
+    "id": 1,
+    "img_src": "http://localhost:5000/memes/meme_1755849253848.png",
+    "img_num": 12,
+    "title": "elder people",
+    "tag": "landscape"
+  },
+  {
+    "id": 2,
+    "img_src": "http://localhost:5000/memes/meme_1755849319925.png",
+    "img_num": 8,
+    "title": "cuirous men",
+    "tag": "food"
+  },
+  {
+    "id": 3,
+    "img_src": "http://localhost:5000/memes/meme_1755849350021.png",
+    "img_num": 24,
+    "title": "twins",
+    "tag": "pet"
+  },
+  {
+    "id": 4,
+    "img_src": "http://localhost:5000/memes/meme_1755851424826.png",
+    "img_num": 6,
+    "title": "electric",
+    "tag": "city"
+  },
+  {
+    "id": 5,
+    "img_src": "http://localhost:5000/memes/meme_1755854327564.png",
+    "img_num": 18,
+    "title": "kid",
+    "tag": "portrait"
+  },
+  {
+    "id": 6,
+    "img_src": "http://localhost:5000/memes/meme_1755854079729.png",
+    "img_num": 18,
+    "title": "couple",
+    "tag": "portrait"
+  }
+],
       fetchPageNum: 1,
       refreshing: false,
 
@@ -91,133 +134,138 @@ export default {
   computed: {
     // 过滤：按精选标签
     filtered() {
-      const tag = this.activeFeatured;
-
-      return (this.lists || []).filter((it) => {
-        const itemTag = (it.tag || it.category || it.topic || '').toString().toLowerCase();
-        return tag ? (itemTag ? itemTag.indexOf(tag) > -1 : true) : true;
+      if (!this.lists) return [];
+      if (this.activeFeatured === 'fire') return this.lists;
+      
+      return this.lists.filter(item => {
+        const tag = (item.tag || '').toLowerCase();
+        return tag === this.activeFeatured.toLowerCase();
       });
     }
   },
-  onLoad() {
-    this.getData();
+  // onLoad() {
+  //   this.getData();
 
-    // 分享渠道（可选）
-    uni.getProvider({
-      service: 'share',
-      success: (e) => {
-        const arr = [];
-        for (let i = 0; i < e.provider.length; i++) {
-          if (e.provider[i] === 'weixin') {
-            arr.push({ name: '微信好友', id: 'weixin' });
-            arr.push({ name: '朋友圈', id: 'weixin', type: 'WXSenceTimeline' });
-          } else if (e.provider[i] === 'qq') {
-            arr.push({ name: 'QQ', id: 'qq' });
-          }
-        }
-        this.providerList = arr;
-      }
-    });
-  },
-  onPullDownRefresh() {
-    this.refreshing = true;
-    this.getData();
-  },
-  onReachBottom() {
-    this.getData();
-  },
-  methods: {
-    onPickFeatured(t) {
-      this.activeFeatured = t.key;
-    },
-    getData() {
-      const page = this.refreshing ? 1 : this.fetchPageNum;
-      const url =
-        this.$serverUrl +
-        '/api/picture/posts.php?page=' +
-        page +
-        '&per_page=12';
+  //   // 分享渠道（可选）
+  //   uni.getProvider({
+  //     service: 'share',
+  //     success: (e) => {
+  //       const arr = [];
+  //       for (let i = 0; i < e.provider.length; i++) {
+  //         if (e.provider[i] === 'weixin') {
+  //           arr.push({ name: '微信好友', id: 'weixin' });
+  //           arr.push({ name: '朋友圈', id: 'weixin', type: 'WXSenceTimeline' });
+  //         } else if (e.provider[i] === 'qq') {
+  //           arr.push({ name: 'QQ', id: 'qq' });
+  //         }
+  //       }
+  //       this.providerList = arr;
+  //     }
+  //   });
+  // },
+  // onPullDownRefresh() {
+  //   this.refreshing = true;
+  //   this.getData();
+  // },
+  // onReachBottom() {
+  //   this.getData();
+  // },
+  // methods: {
+  //   onPickFeatured(t) {
+  //     this.activeFeatured = t.key;
+  //   },
+  //   getData() {
+  //     this.lists = this.lists.map(item => ({
+  //       ...item,
+  //       guid: this.newGuid() + (item.id != null ? item.id : '')
+  //     }));
+  //     // const page = this.refreshing ? 1 : this.fetchPageNum;
+  //     // const url =
+  //     //   this.$serverUrl +
+  //     //   '/api/picture/posts.php?page=' +
+  //     //   page +
+  //     //   '&per_page=12';
 
-      uni.request({
-        url,
-        success: (ret) => {
-          if (ret.statusCode !== 200) return;
+  //     // uni.request({
+  //     //   url,
+  //     //   success: (ret) => {
+  //     //     if (ret.statusCode !== 200) return;
 
-          const data = ret.data || [];
-          const list = data.map((item) => {
-            item.guid =
-              this.newGuid() + (item.id != null ? item.id : '');
-            return item;
-          });
+  //     //     const data = ret.data || [];
+  //     //     const list = data.map((item) => {
+  //     //       item.guid =
+  //     //         this.newGuid() + (item.id != null ? item.id : '');
+  //     //       return item;
+  //     //     });
 
-          if (this.refreshing) {
-            this.refreshing = false;
-            uni.stopPullDownRefresh();
-            this.lists = list;
-            this.fetchPageNum = 2;
-          } else {
-            this.lists = this.lists.concat(list);
-            this.fetchPageNum += 1;
-          }
-        }
-      });
-    },
-    newGuid() {
-      const s4 = () =>
-        ((65536 * (1 + Math.random())) | 0)
-          .toString(16)
-          .substring(1);
-      return (
-        s4() +
-        s4() +
-        '-' +
-        s4() +
-        '-4' +
-        s4().substr(0, 3) +
-        '-' +
-        s4() +
-        '-' +
-        s4() +
-        s4() +
-        s4()
-      ).toUpperCase();
-    },
-    goDetail(e) {
-      uni.navigateTo({
-        url:
-          '../detail/detail?data=' +
-          encodeURIComponent(JSON.stringify(e))
-      });
-    },
-    share(e) {
-      if (!this.providerList.length) {
-        uni.showModal({
-          title: '当前环境无分享渠道!',
-          showCancel: false
-        });
-        return;
-      }
-      const itemList = this.providerList.map((v) => v.name);
-      uni.showActionSheet({
-        itemList,
-        success: (res) => {
-          const prov = this.providerList[res.tapIndex];
-          uni.share({
-            provider: prov.id,
-            scene:
-              prov.type === 'WXSenceTimeline'
-                ? 'WXSenceTimeline'
-                : 'WXSceneSession',
-            type: 0,
-            title: 'uni-app模版',
-            summary: e.title,
-            imageUrl: e.img_src,
-            href: 'https://uniapp.dcloud.io'
-          });
-        }
-      });
-    }
-  }
+  //     //     if (this.refreshing) {
+  //     //       this.refreshing = false;
+  //     //       uni.stopPullDownRefresh();
+  //     //       this.lists = list;
+  //     //       this.fetchPageNum = 2;
+  //     //     } else {
+  //     //       this.lists = this.lists.concat(list);
+  //     //       this.fetchPageNum += 1;
+  //     //     }
+  //     //   }
+  //     // });
+  //   },
+  //   newGuid() {
+  //     const s4 = () =>
+  //       ((65536 * (1 + Math.random())) | 0)
+  //         .toString(16)
+  //         .substring(1);
+  //     return (
+  //       s4() +
+  //       s4() +
+  //       '-' +
+  //       s4() +
+  //       '-4' +
+  //       s4().substr(0, 3) +
+  //       '-' +
+  //       s4() +
+  //       '-' +
+  //       s4() +
+  //       s4() +
+  //       s4()
+  //     ).toUpperCase();
+  //   },
+  //   goDetail(e) {
+  //     uni.navigateTo({
+  //       url:
+  //         '../detail/detail?data=' +
+  //         encodeURIComponent(JSON.stringify(e))
+  //     });
+  //   },
+  //   share(e) {
+  //     if (!this.providerList.length) {
+  //       uni.showModal({
+  //         title: '当前环境无分享渠道!',
+  //         showCancel: false
+  //       });
+  //       return;
+  //     }
+  //     const itemList = this.providerList.map((v) => v.name);
+  //     uni.showActionSheet({
+  //       itemList,
+  //       success: (res) => {
+  //         const prov = this.providerList[res.tapIndex];
+  //         uni.share({
+  //           provider: prov.id,
+  //           scene:
+  //             prov.type === 'WXSenceTimeline'
+  //               ? 'WXSenceTimeline'
+  //               : 'WXSceneSession',
+  //           type: 0,
+  //           title: 'uni-app模版',
+  //           summary: e.title,
+  //           imageUrl: e.img_src,
+  //           href: 'https://uniapp.dcloud.io'
+  //         });
+  //       }
+  //     });
+  //   }
+  // }
 };
 </script>
 

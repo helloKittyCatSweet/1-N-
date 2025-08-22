@@ -81,22 +81,43 @@ export default {
     return {
       // 左侧分类（示例）
       data: [
-        { type: '动物', id: 1, key: 1, icon: 'https://placehold.co/200x200' },
-        { type: '风景', id: 2, key: 2, icon: 'https://placehold.co/200x200' },
-        { type: '建筑', id: 3, key: 3, icon: 'https://placehold.co/200x200' },
-        { type: '美女', id: 4, key: 4, icon: 'https://placehold.co/200x200' },
-        { type: '汽车', id: 5, key: 5, icon: 'https://placehold.co/200x200' },
-        { type: '运动', id: 6, key: 6, icon: 'https://placehold.co/200x200' },
-        { type: '搞笑', id: 7, key: 7, icon: 'https://placehold.co/200x200' },
-        { type: '影视', id: 8, key: 8, icon: 'https://placehold.co/200x200' },
-        { type: '科技', id: 9, key: 9, icon: 'https://placehold.co/200x200' },
-        { type: '艺术', id: 10, key: 10, icon: 'https://placehold.co/200x200' }
+        { type: 'frank caprio', id: 1, key: 1, icon: 'https://placehold.co/200x200' },
+        { type: 'mykasih', id: 2, key: 2, icon: 'https://placehold.co/200x200' },
+        { type: 'sumbangan asas rahmah', id: 3, key: 3, icon: 'https://placehold.co/200x200' },
+        { type: 'inter miami vs tigres uanl', id: 4, key: 4, icon: 'https://placehold.co/200x200' },
+        { type: 'jay fai bangkok', id: 5, key: 5, icon: 'https://placehold.co/200x200' },
+        { type: 'coe prices', id: 6, key: 6, icon: 'https://placehold.co/200x200' },
+        { type: 'sbs transit punggol mrt negligence', id: 7, key: 7, icon: 'https://placehold.co/200x200' },
+        { type: 'la galaxy vs pachuca', id: 8, key: 8, icon: 'https://placehold.co/200x200' },
+        { type: 'grab singapore ride hailing fares glitch', id: 9, key: 9, icon: 'https://placehold.co/200x200' },
+        { type: 'yankee', id: 10, key: 10, icon: 'https://placehold.co/200x200' }
       ],
       keyword: '',
       activeCat: null,
 
       // 右侧列表数据
-      lists: [],
+      lists: [
+        // 单条数据（右侧列表每一项）
+{
+  id: 6,                         // 主键
+  img_src: 'http://localhost:5000/memes/meme_1755854079729.png', // 图片地址（可公网访问）
+  img_num: 18,                   // 张数，用于显示 badge
+  title: 'couple',               // 卡片标题
+  tag: 'portrait',               // 分类 key，用于过滤
+  type: 'portrait',              // 分类名称，用于接口传参
+  guid: 'A1B2C3D4'               // 唯一标识，瀑布流 key 用
+},
+// // 单条数据（右侧列表每一项）
+// {
+//   id: 7,                         // 主键
+//   img_src: 'http://localhost:5000/memes/meme_1755851424826.png', // 图片地址（可公网访问）
+//   img_num: 18,                   // 张数，用于显示 badge
+//   title: 'couple',               // 卡片标题
+//   tag: 'portrait',               // 分类 key，用于过滤
+//   type: 'portrait',              // 分类名称，用于接口传参
+//   guid: 'A1B2C3D5'               // 唯一标识，瀑布流 key 用
+// }
+      ],
       fetchPageNum: 1,
       refreshing: false,
       providerList: []
@@ -129,74 +150,74 @@ export default {
       }
     });
   },
-  methods: {
-    selectCategory(c) {
-      if ((this.activeCat && this.activeCat.key) === c.key) return;
-      this.activeCat = c;
-      this.resetAndFetch();
-    },
-    resetAndFetch() {
-      this.lists = [];
-      this.fetchPageNum = 1;
-      this.getData();
-    },
-    getData() {
-      const page = this.refreshing ? 1 : this.fetchPageNum;
-      const typeParam = (this.activeCat && this.activeCat.type) || '';
-      const idParam   = (this.activeCat && this.activeCat.id)   || '';
-      const url = this.$serverUrl +
-        `/api/picture/posts.php?page=${page}&per_page=2&type=${encodeURIComponent(typeParam)}&id=${encodeURIComponent(idParam)}`;
+  // methods: {
+  //   selectCategory(c) {
+  //     if ((this.activeCat && this.activeCat.key) === c.key) return;
+  //     this.activeCat = c;
+  //     // this.resetAndFetch();
+  //   },
+  //   resetAndFetch() {
+  //     this.lists = [];
+  //     this.fetchPageNum = 1;
+  //     this.getData();
+  //   },
+  //   getData() {
+  //     const page = this.refreshing ? 1 : this.fetchPageNum;
+  //     const typeParam = (this.activeCat && this.activeCat.type) || '';
+  //     const idParam   = (this.activeCat && this.activeCat.id)   || '';
+  //     const url = this.$serverUrl +
+  //       `/api/picture/posts.php?page=${page}&per_page=2&type=${encodeURIComponent(typeParam)}&id=${encodeURIComponent(idParam)}`;
 
-      uni.request({
-        url,
-        success: (ret) => {
-          if (ret.statusCode !== 200) return;
-          const data = ret.data || [];
-          const list = data.map(item => {
-            item.guid = this.newGuid() + ((item.id != null ? item.id : '') + '');
-            return item;
-          });
-          if (this.refreshing) {
-            this.refreshing = false; uni.stopPullDownRefresh();
-            this.lists = list; this.fetchPageNum = 2;
-          } else {
-            this.lists = this.lists.concat(list); this.fetchPageNum += 1;
-          }
-        }
-      });
-    },
-    newGuid() {
-      const s4 = () => ((65536 * (1 + Math.random())) | 0).toString(16).substring(1);
-      return (s4()+s4()+"-"+s4()+"-4"+s4().substr(0,3)+"-"+s4()+"-"+s4()+s4()+s4()).toUpperCase();
-    },
-    goDetail(e) {
-      const t = e.type || ((this.activeCat && this.activeCat.type) || '');
-      const i = e.id   || ((this.activeCat && this.activeCat.id)   || '');
-      uni.navigateTo({ url: '../list/list?type=' + t + '&id=' + i });
-    },
-    share(e) {
-      if (!this.providerList.length) {
-        uni.showModal({ title: '当前环境无分享渠道!', showCancel: false });
-        return;
-      }
-      const itemList = this.providerList.map(v => v.name);
-      uni.showActionSheet({
-        itemList,
-        success: (res) => {
-          const prov = this.providerList[res.tapIndex];
-          uni.share({
-            provider: prov.id,
-            scene: prov.type === 'WXSenceTimeline' ? 'WXSenceTimeline' : 'WXSceneSession',
-            type: 0,
-            title: 'uni-app模版',
-            summary: e.title,
-            imageUrl: e.img_src,
-            href: 'https://uniapp.dcloud.io'
-          });
-        }
-      });
-    }
-  }
+  //     // uni.request({
+  //     //   url,
+  //     //   success: (ret) => {
+  //     //     if (ret.statusCode !== 200) return;
+  //     //     const data = ret.data || [];
+  //     //     const list = data.map(item => {
+  //     //       item.guid = this.newGuid() + ((item.id != null ? item.id : '') + '');
+  //     //       return item;
+  //     //     });
+  //     //     if (this.refreshing) {
+  //     //       this.refreshing = false; uni.stopPullDownRefresh();
+  //     //       this.lists = list; this.fetchPageNum = 2;
+  //     //     } else {
+  //     //       this.lists = this.lists.concat(list); this.fetchPageNum += 1;
+  //     //     }
+  //     //   }
+  //     // });
+  //   },
+  //   newGuid() {
+  //     const s4 = () => ((65536 * (1 + Math.random())) | 0).toString(16).substring(1);
+  //     return (s4()+s4()+"-"+s4()+"-4"+s4().substr(0,3)+"-"+s4()+"-"+s4()+s4()+s4()).toUpperCase();
+  //   },
+  //   goDetail(e) {
+  //     const t = e.type || ((this.activeCat && this.activeCat.type) || '');
+  //     const i = e.id   || ((this.activeCat && this.activeCat.id)   || '');
+  //     uni.navigateTo({ url: '../list/list?type=' + t + '&id=' + i });
+  //   },
+  //   share(e) {
+  //     if (!this.providerList.length) {
+  //       uni.showModal({ title: '当前环境无分享渠道!', showCancel: false });
+  //       return;
+  //     }
+  //     const itemList = this.providerList.map(v => v.name);
+  //     uni.showActionSheet({
+  //       itemList,
+  //       success: (res) => {
+  //         const prov = this.providerList[res.tapIndex];
+  //         uni.share({
+  //           provider: prov.id,
+  //           scene: prov.type === 'WXSenceTimeline' ? 'WXSenceTimeline' : 'WXSceneSession',
+  //           type: 0,
+  //           title: 'uni-app模版',
+  //           summary: e.title,
+  //           imageUrl: e.img_src,
+  //           href: 'https://uniapp.dcloud.io'
+  //         });
+  //       }
+  //     });
+  //   }
+  // }
 };
 </script>
 

@@ -7,9 +7,11 @@
           v-if="currentMeme.url"
           :src="currentMeme.url"
           class="main-image"
-          mode="aspectFill"
+          mode="aspectFit"
         />
-        <view v-else class="empty-main">🖼️ waiting to be generated</view>
+        <view v-else class="empty-main">
+          Input keywords to start
+        </view>
       </view>
     </view>
 
@@ -73,7 +75,7 @@
         <view v-if="memeList.length === 0" class="empty-right">
           <view class="empty-icon">🎨</view>
           <text class="empty-text">No works yet</text>
-          <text class="empty-desc">Input keywords to start</text>
+          <text class="empty-desc">Create your first meme!</text>
         </view>
       </scroll-view>
     </view>
@@ -443,9 +445,11 @@ async handleSearch() {
   border-radius: 16rpx;
   overflow: hidden;
   background: #f1f3f5;
-  min-height: 0; /* 防止内容溢出 */
-  height: calc(100vh - 32rpx); /* 减去页面padding */
+  min-height: 0;
+  height: calc(100vh - 120rpx); /* 减少高度，留出上下间距 */
+  margin: 40rpx; /* 添加外边距 */
   box-sizing: border-box;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
 }
 
 .main-image,
@@ -457,11 +461,18 @@ async handleSearch() {
 
 .empty-main {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
-  color: #adb5bd;
   height: 100%;
+  gap: 24rpx;
+  color: #adb5bd;
+}
+
+.empty-main::before {
+  content: "🖼️";
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
 }
 
 /* 中间：控制区域 13% */
@@ -684,26 +695,33 @@ async handleSearch() {
 }
 
 .empty-right {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   color: #adb5bd;
-  margin-top: 100rpx;
-  font-size: 28rpx;
+  padding: 40rpx;
 }
 
 .empty-icon {
-  font-size: 80rpx;
-  margin-bottom: 10rpx;
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.8;
 }
 
 .empty-text {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 600;
-  margin-bottom: 8rpx;
+  margin-bottom: 16rpx;
+  color: #495057;
 }
 
 .empty-desc {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #868e96;
+  text-align: center;
+  line-height: 1.5;
 }
 
 /* 响应式设计 */

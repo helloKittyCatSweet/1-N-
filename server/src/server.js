@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import sequelize from './config/database.js';
 import authRoutes from './routes/auth.js';
+import generateMemeImage from './controllers/integrated.js'; // 新增导入
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +38,24 @@ sequelize
 
 // Routes
 app.use('/api/auth', authRoutes);
+
+
+// 新增图片生成API路由
+app.post('/api/generate-meme', async (req, res) => {
+  try {
+    await generateMemeImage();
+    res.status(200).json({
+      success: true,
+      message: '图片生成成功'
+    });
+  } catch (error) {
+    console.error('图片生成失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 
 // Test route
 app.get('/', (req, res) => {
